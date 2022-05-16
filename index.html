@@ -1,0 +1,152 @@
+<!-- 
+  navmesh not working
+  unable to shoot
+ -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Shooting Game in Virtual Reality</title>
+  <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+  <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+  <script src="https://recast-api.donmccurdy.com/aframe-inspector-plugin-recast.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+
+  <script src="./shoot.js"></script>
+  <script src="./gameObjects.js"></script>
+  <script src="./playerMovement.js"></script>
+  <script src="./enemyShoot.js"></script>
+  <script src="./timer.js"></script>
+
+</head>
+
+<body>
+  <a-scene id="scene" inspector-plugin-recast>
+
+    <!--Assets-->
+    <a-assets>
+      <a-asset-item id="shooter" src="./models/shooter/gun.gltf"></a-asset-item>
+      <a-asset-item id="collider" src="./models/navmesh.gltf"></a-asset-item>
+
+      <a-asset-item id="monster-1" src="./models/monster-1/scene.gltf"></a-asset-item>
+      <a-asset-item id="monster-2" src="./models/monster-2/scene.gltf"></a-asset-item>
+      <a-asset-item id="monster-3" src="./models/monster-3/scene.gltf"></a-asset-item>
+      <a-asset-item id="coin" src="./models/coin/scene.gltf"></a-asset-item>
+      <a-asset-item id="fruit-basket" src="./models/fruit-basket/scene.gltf"></a-asset-item>
+
+      <audio id="shoot" src="./sounds/shoot.mp3"></audio>
+      <audio id="footstep" src="./sounds/footStep.mp3"></audio>
+
+    </a-assets>
+
+    <!--A-Frame Environment-->
+    <a-entity id="environment" environment="preset: starry; skyType:gradient; lighting:point">
+    </a-entity>
+
+    <!--Sounds-->
+    <a-entity id="sound1" sound="src: #shoot; poolSize:2; autoplay: false; volume: 1;loop:false"></a-entity>
+    <a-entity id="sound2" sound="src: #footstep; poolSize:2;autoplay: false; volume: 4;loop:false"></a-entity>
+
+    <!--Light-->
+    <a-entity light="type: ambient; color: white; intensity:0.5"></a-entity>
+    <a-entity light="type: directional; color: #EEE; intensity: 1" position="-1 1 0"></a-entity>
+
+    <a-entity id="camera-rig" movement-controls="speed: 0.2; constrainToNavMesh: true" position="0 0 0">
+      
+      <a-entity id="camera" camera position="-9 4 20" look-controls="pointerLockEnabled: false">
+        <a-entity id="weapon" gltf-model="#shooter" position="0 -4.4 3" rotation="0 180 0" scale="0.35 1 1"
+          player-movement>
+        </a-entity>
+        <a-cursor></a-cursor>
+        
+        <a-entity id="level1" position="-8 5.21669 -7.1" text="font: mozillavr; width:5; height: 5; value: Level 1">
+        </a-entity>
+
+        <a-entity position = '7 5 -7.1'>
+          <a-entity position = '-4.2 0 0' text = 'font: mozillavr;width:10; height: 5;; value: Time \n Remaining'></a-entity>
+          <a-entity position = '-10.3 0 0' text = 'font:mozillavr; align: center; width:15; color:black; value: 00:00' id = 'timer' timer></a-entity>
+        </a-entity>
+ 
+        <a-entity id="enemytargets" position="7 5 -7.1" text="font: mozillavr;width:10; height: 5; value: Enemies Left:">
+          <a-entity id="countEnemy" position="3 0 0" text="font: mozillavr; width:10; height: 5;color:black; value: 6"></a-entity>
+        </a-entity>
+
+        <a-entity id="playerLife" position="-3 5 -7.16344" text="font: mozillavr; width:10; height: 5;value: Player Life:">
+          <a-entity id="countLife" position="2.5 0 0" text="font: mozillavr; width:10; color:black; height: 5; value: 2"></a-entity>
+        </a-entity>
+
+        <a-entity id="over" position="1 1 -3"
+          text="font: mozillavr; width:5; height: 5; value: Better Luck Next Time :(" visible="false">
+        </a-entity>
+
+        <a-entity id="completed" position="1.5 1 -3"
+          text="font: mozillavr; width:5; height: 5; value: Level Completed :)" visible="false">
+        </a-entity>
+      </a-entity>
+    </a-entity>
+
+    <!--Bullets-->
+    <a-entity bullets></a-entity>
+
+    <!--Game Objects-->
+    <a-entity boxes></a-entity>
+
+    <!--Ground-->
+    <a-plane id="ground" repeat="5 5" position="0 1 0" rotation="-90 0 0" height="200" width="200" color="#FBF2D4"
+      static-body visible="false">
+    </a-plane>
+
+    <!-- Navigation Mesh -->
+    <a-entity id="navigation-mesh" gltf-model="#collider" visible="false" nav-mesh>
+    </a-entity>
+
+     <!--Main Walls-->
+     <a-box id="right-wall" material="color: purple" repeat="10 1 1" position="25 5 -15.5" rotation="0 -90 0" height="10" width="50" depth="1" static-body visible="true"></a-box>
+     <a-box id="left-wall" material="color: purple" repeat="10 1 1" position="-25 5 -15.5" rotation="0 90 0" height="10" width="50" depth="1" static-body visible="true"></a-box>
+     <a-box id="back-wall" material="color: purple" repeat="10 1 1" position="0 5 -40" rotation="0 0 0" height="10" width="50" depth="1" static-body visible="true"></a-box>
+     <a-box id="front-wall-1" material="color: purple" repeat="10 1 1" position="10.2 5 10" rotation="0 0 0" height="10" width="30" depth="1" static-body visible="true"></a-box>
+     <a-box id="front-wall-2" material="color: purple" repeat="10 1 1" position="-20 5 10" rotation="0 0 0" height="10" width="10" depth="1" static-body visible="true"></a-box>
+
+     <a-box id="right-wall-1" material="color: cyan" repeat="10 1 1" position="20 5 -25.5" rotation="0 -90 0" height="10" width="20" depth="1" static-body visible="true"></a-box>
+     <a-box id="right-wall-2" material="color: cyan" repeat="10 1 1" position="20 5 0.5" rotation="0 -90 0" height="10" width="10" depth="1" static-body visible="true"></a-box>
+     <a-box id="left-wall" material="color: cyan" repeat="10 1 1" position="-20 5 -14.75" rotation="0 90 0" height="10" width="40.52" depth="1" static-body visible="true"></a-box>
+     <a-box id="back-wall" material="color: cyan" repeat="10 1 1" position="0 5 -35" rotation="0 0 0" height="10" width="40" depth="1" static-body visible="true"></a-box>
+     <a-box id="front-wall" material="color: cyan" repeat="10 1 1" position="0 5 5" rotation="0 0 0" height="10" width="40" depth="1" static-body visible="true"></a-box>
+
+     <a-box id="left-wall-1" material="color: pink" repeat="10 1 1" position="-15 5 -20.5" rotation="0 -90 0" height="10" width="10" depth="1" static-body visible="true"></a-box>
+     <a-box id="left-wall-2" material="color: pink" repeat="10 1 1" position="-15 5 -4.5" rotation="0 -90 0" height="10" width="10" depth="1" static-body visible="true"></a-box>
+     <a-box id="right-wall" material="color: pink" repeat="10 1 1" position="15 5 -12" rotation="0 90 0" height="10" width="25" depth="1" static-body visible="true"></a-box>
+     <a-box id="back-wall" material="color: pink" repeat="10 1 1" position="0 5 -25" rotation="0 0 0" height="10" width="30" depth="1" static-body visible="true"></a-box>
+     <a-box id="front-wall" material="color: pink" repeat="10 1 1" position="0 5 0" rotation="0 0 0" height="10" width="30" depth="1" static-body visible="true"></a-box>
+
+     <a-box id="right-wall-1" material="color: yellow" repeat="10 1 1" position="10 5 -16.25" rotation="0 -90 0" height="10" width="8" depth="1" static-body visible="true"></a-box>
+     <a-box id="right-wall-2" material="color: yellow" repeat="10 1 1" position="10 5 -5.75" rotation="0 -90 0" height="10" width="2.5" depth="1" static-body visible="true"></a-box>
+     <a-box id="left-wall" material="color: yellow" repeat="10 1 1" position="-10 5 -12.5" rotation="0 90 0" height="10" width="16" depth="1" static-body visible="true"></a-box>
+     <a-box id="back-wall" material="color: yellow" repeat="10 1 1" position="0 5 -20" rotation="0 0 0" height="10" width="20" depth="1" static-body visible="true"></a-box>
+     <a-box id="front-wall" material="color: yellow" repeat="10 1 1" position="0 5 -5" rotation="0 0 0" height="10" width="20" depth="1" static-body visible="true"></a-box>
+
+     <a-entity id = 'fruitBasket' gltf-model="#fruit-basket" position = '0 5 -12' scale = '2 2 2'></a-entity>
+     <a-entity id = 'enemy1' class = 'enemy' static-body gltf-model="#monster-1" position = '-22.5 4 0' scale = '0.1 0.1 0.1'></a-entity>
+     <a-entity id = 'enemy2' class = 'enemy' static-body gltf-model="#monster-2" position = '0 4 -30' scale = '1 1 1' rotation = '0 90 0'></a-entity>
+     <a-entity id = 'enemy3' class = 'enemy' static-body gltf-model="#monster-3" position = '22.5 4 0' scale = '1 1 1'></a-entity>
+     <a-entity id = 'enemy4' class = 'enemy' static-body gltf-model="#monster-2" position = '22.5 4 -20' scale = '1 1 1'></a-entity>
+     <a-entity id = 'enemy5' class = 'enemy' static-body gltf-model="#monster-1" position = '10 4 -37.5' scale = '0.1 0.1 0.1' rotation = '0 90 0'></a-entity>
+     <a-entity id = 'enemy6' class = 'enemy' static-body gltf-model="#monster-3" position = '-17.5 4 -10' scale = '1 1 1'></a-entity>
+ 
+     <a-entity id='enemy-bullets' enemy-bullets></a-entity>
+
+     <a-entity id = 'coin1' gltf-model="#coin" position = '-22.5 4 -20' scale = '0.5 0.5 0.5'></a-entity>
+     <a-entity id = 'coin2' gltf-model="#coin" position = '10 4 -30' scale = '0.5 0.5 0.5' rotation = '0 90 0'></a-entity>
+     <a-entity id = 'coin3' gltf-model="#coin" position = '22.5 4 15' scale = '0.5 0.5 0.5'></a-entity>
+     <a-entity id = 'coin4' gltf-model="#coin" position = '22.5 4 -10' scale = '0.5 0.5 0.5'></a-entity>
+     <a-entity id = 'coin5' gltf-model="#coin" position = '-10 4 -37.5' scale = '0.5 0.5 0.5' rotation = '0 90 0'></a-entity>
+     <a-entity id = 'coin3' gltf-model="#coin" position = '-17.5 4 0' scale = '0.5 0.5 0.5'></a-entity>
+
+
+  </a-scene>
+</body>
+
+</html>
